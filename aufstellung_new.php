@@ -1,9 +1,10 @@
 <?php
-//Standart Werte(funktioniert noch nt komplett)
+//Environment Variables(funktioniert noch nt komplett)
 
 $rankSpieß = "Fw.";
 $rankStelvZgfh = "Fw.";
 $rankZgfhr = "Lt.";
+$rankstvZgFhr = "Fähnr.";
 $rankKmpchef = "Maj.";
 $rankKmpfhr = "Hptm.";
 $rankS2 = "Fw.";
@@ -11,16 +12,29 @@ $rankS1 = "Fw.";
 $rankGrpFhr = "Fw.";
 $rankStlvGrpFhr = "Uffz.";
 $rankSoldat = "Jg.";
-
+$ifNoneMessage = "---";
+$rankS3 = "Lt.";
 
 //Funktionen:
+
+function pdo()
+{
+    $host = "localhost";
+    $name = "admin";
+    $user = "root";
+    $password = "";
+
+
+    return new PDO("mysql:host=$host;dbname=$name", $user, $password);
+}
+
 function decodePictureURL($number): string
 
 {
     $output = "Oh ein fehler in der Matrix, welche Pulle äääh Pille nimmst du?(Error Code: 69.001)";
     switch ($number) {
         case 0:
-            $output = '<img src="https://www.9jgkp.de/Bilder/Rang/Jäger.png" title="Jäger" alt="Jäger">';
+            $output = '<img src="https://www.9jgkp.de/Bilder/Rang/Jaeger.png" title="Jaeger" alt="Jaeger">';
             break;
         case 1:
             $output = '<img src="https://www.9jgkp.de/Bilder/Rang/Gefreiter.png" title="Gefreiter" alt="Gefreiter">';
@@ -291,8 +305,11 @@ function decodePost($number): string
         case 6:
             $output = "Zugführer";
             break;
-        case -1:
+        case 7:
             $output = "Beobachter";
+            break;
+        case 8:
+            $output = "Scharfschütze";
             break;
     }
     return $output;
@@ -363,16 +380,6 @@ function decodeSpecialPosts($number): string
             break;
     }
     return $output;
-}
-
-function pdo()
-{
-    $host = "localhost";
-    $name = "admin";
-    $user = "root";
-    $password = "";
-
-    return new PDO("mysql:host=$host;dbname=$name", $user, $password);
 }
 
 function findPost($post)
@@ -463,10 +470,24 @@ function ifNull($functionFull, $function)
     }
 
     if ($function == null) {
-        return "nicht besetzt";
+        return $ifNoneMessage;
     }
-    return "nicht besetzt";
+    return $ifNoneMessage;
 }
+
+function spawnSpacer()
+{
+    ?>
+    <div>
+        <br>
+        <br>
+        <div class="teiler"></div>
+        <br>
+        <br>
+    </div>
+    <?php
+}
+
 ?>
 
 
@@ -490,12 +511,11 @@ function ifNull($functionFull, $function)
     }
 
     .tabelle-res {
-        text-align: center;
-        width: 20%;
-        min-width: 100px;
-        text-align: right;
+        margin-left: auto;
+        margin-right: auto;
+        width: 25%;
+        min-width: 80px;
     }
-
 
     .center {
         margin-left: auto;
@@ -511,7 +531,6 @@ function ifNull($functionFull, $function)
         height: 0;
         clear: both;
     }
-
 
     h2 {
 
@@ -553,18 +572,24 @@ function ifNull($functionFull, $function)
     */
 
 </style>
-
+<!-- head -->
 <head>
     <title>Aufstellung - 9Jgkp</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bearbeitet am xx.xx.xxxx ist egal weil datenbank bitch | Version 69 -->
 </head>
-
+<!-- body-->
 <body oncontextmenu="return false">
 <!-- Aktive Teile -->
 <div class="lexiconToc" style="width:100%; height:100%;">
     <!-- Kommandantur -->
     <div>
+        <div class="teiler"></div>
+        <br>
+        <br>
+    </div>
+	<div>
         <?php
         $kompaniechef = singleFindPost(3);
         $kompaniefuehrer = singleFindPost(4);
@@ -573,68 +598,62 @@ function ifNull($functionFull, $function)
             <tr>
                 <th colspan="4" style="text-align:center;"><h1>Kommandantur</h1></th>
             </tr>
-            <tr style="heigth: 20px">
-            </tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
             <tr>
                 <th><h4>Posten:</h4></th>
                 <th><h4>Dienstgrad:&nbsp;</h4></th>
                 <th><h3>Besetzung:</h3></th>
                 <th><h3>Abzeichen:</h3></th>
             </tr>
-            <td><h4>Kompaniechef:</h4></td>
-            <td><h4><?php if ($kompaniechef === null) {
-                        echo $rankKmpchef;
-                    } else {
-                        echo decodeRank($kompaniechef["user_rank"]);
-                    } ?></h4></td>
 
-            <td><a href="<?php if (!$kompaniechef === null) {
-                    echo $kompaniechef["url"];
-                } ?>"><?php echo ifNull($kompaniechef["username"], $kompaniechef); ?></a>&nbsp;
-            </td>
-            <td><?php
-                if ($kompaniechef === null) {
-                    echo '<img src="https://www.9jgkp.de/Bilder/Rang/Major.png" title="Major" alt="Major">';
-                } else {
-                    echo decodePictureURL($kompaniechef["user_rank"]);
-                }
-                ?></td>
+            <!-- Kompaniechef -->
             <tr>
-                <td><h4>Kompanieführer:</h4></td>
-                <td><h4><?php if ($kompaniefuehrer === null) {
-                            echo $rankKmpfhr;
-                        } else {
-                            echo decodeRank($kompaniefuehrer["user_rank"]);
-                        } ?></h4></td>
-                <td>
-                    <a href="<?php if ($kompaniefuehrer !== null) {
-                        echo $kompaniefuehrer["url"];
-                    } ?>"><?php if ($kompaniefuehrer === null) {
-                            echo "nicht besetzt";
-                        } else {
-                            echo $kompaniefuehrer["username"];
-                        } ?></a>&nbsp;
-                </td>
-                <td>
-                    <?php
-                    if ($kompaniefuehrer === null) {
-                        echo '<img src="https://www.9jgkp.de/Bilder/Rang/Major.png" title="Major" alt="Major">';
-                    } else {
-                        echo decodePictureURL($kompaniefuehrer["user_rank"]);
-                    }
-                    ?>
-                </td>
-            </tr>
+				<td><h4>Kompaniechef:</h4></td>
+				<td><h4><?php if ($kompaniechef === null) {
+							echo $rankKmpchef;
+						} else {
+							echo decodeRank($kompaniechef["user_rank"]);
+						} ?></h4></td>
+				<td>
+					<a href="<?php if (!$kompaniechef === null) {
+						echo $kompaniechef["url"];
+					} ?>"><?php echo ifNull($kompaniechef["username"], $kompaniechef); ?></a>&nbsp;
+				</td>
+
+				<td>
+					<?php
+					if ($kompaniechef === null) {
+						echo '<img src="https://www.9jgkp.de/Bilder/Rang/Major.png" title="Major" alt="Major">';
+					} else {
+						echo decodePictureURL($kompaniechef["user_rank"]);
+					}
+					?>
+				</td>
+			</tr>
+
+            <!-- Kompanieführer -->
+            <?php
+            if ($kompaniefuehrer) {
+                ?>
+                <tr>
+					<td><h4>Kompanieführer:</h4></td>
+					<td><h4><?php echo decodeRank($kompaniefuehrer["user_rank"]) ?></h4></td>
+					<td><a href="<?php echo $kompaniefuehrer["url"] ?>"><?php echo $kompaniefuehrer["username"] ?></a></td>
+					<td> <?php echo decodePictureURL($kompaniefuehrer["user_rank"]) ?></td>
+				</tr>
+					<?php
+            }
+            ?>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+			
         </table>
     </div>
-    <!-- Teiler -->
-    <div>
-        <br>
-        <br>
-        <div class="teiler"></div>
-        <br>
-        <br>
-    </div>
+    <?php spawnSpacer() ?>
+
     <!-- Stab -->
     <div>
         <div>
@@ -642,13 +661,12 @@ function ifNull($functionFull, $function)
                 <tr>
                     <th colspan="4" style="text-align:center;"><h1>Stab</h1></th>
                 </tr>
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
             </table>
         </div>
-        <div>
-            <br>
-            <br>
-            <br>
-        </div>
+        <!-- S1 -->
         <div class="tabelle">
             <?php
             $spieß = SingleFindSpecialPost(1);
@@ -656,7 +674,7 @@ function ifNull($functionFull, $function)
             ?>
             <table style="margin-left:auto; margin-right:auto">
                 <tr>
-                    <th colspan="4"><h2>S1<i>(Beschreibung)</i></h2></th>
+                    <th colspan="4"><h2>S1<i>(Innendienst)</i></h2></th>
                 </tr>
                 <tr>
                     <th><h4>Posten:</h4></th>
@@ -664,6 +682,7 @@ function ifNull($functionFull, $function)
                     <th><h3>Besetzung:</h3></th>
                     <th><h3>Abzeichen:</h3></th>
                 </tr>
+                <!-- Spieß -->
                 <tr>
                     <td><h4>Leiter S1 (Spieß):</h4></td>
                     <td><h4>
@@ -680,7 +699,7 @@ function ifNull($functionFull, $function)
                             echo $spieß["url"];
                         } ?>">
                             <?php if ($spieß === null) {
-                                echo "nicht besetzt";
+                                echo $ifNoneMessage;
                             } else {
                                 echo $spieß["username"];
                             } ?></a>
@@ -695,6 +714,7 @@ function ifNull($functionFull, $function)
                         ?>
                     </td>
                 </tr>
+                <!-- V-Soldat -->
                 <?php
                 $vSoldat = findSpecialPost(2);
                 foreach ($vSoldat as $vSoldatSingle) {
@@ -709,12 +729,16 @@ function ifNull($functionFull, $function)
                     <?php
                 }
                 ?>
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
             </table>
         </div>
+        <!-- S2 -->
         <div class="tabelle">
             <table style="margin-left:auto; margin-right:auto">
                 <tr>
-                    <th colspan="4" style="text-align:center"><h2>S2<i>(Beschreibung)</h2></i></th>
+                    <th colspan="4" style="text-align:center"><h2>S2<i>(Kommunikation und Aussendienst)</h2></i></th>
                 </tr>
                 <tr>
                     <th><h4>Posten:</h4></th>
@@ -722,13 +746,14 @@ function ifNull($functionFull, $function)
                     <th><h3>Besetzung:</h3></th>
                     <th><h3>Abzeichen:</h3></th>
                 </tr>
+                <!-- Leiter S2 -->
                 <tr>
                     <td><h4>Leiter S2:</h4></td>
                     <td><h4>
                             <?php
                             $seniorDeveloper = singleFindSpecialPost(3);
                             if ($seniorDeveloper === null) {
-                                echo 'Fw.';
+                                echo $rankS2;
                             } else {
                                 echo decodeRank($seniorDeveloper["user_rank"]);
                             }
@@ -739,7 +764,7 @@ function ifNull($functionFull, $function)
                             echo $seniorDeveloper["url"];
                         } ?>">
                             <?php if ($seniorDeveloper === null) {
-                                echo "nicht besetzt";
+                                echo $ifNoneMessage;
                             } else {
                                 echo $seniorDeveloper["username"];
                             } ?></a>
@@ -754,6 +779,7 @@ function ifNull($functionFull, $function)
                         ?>
                     </td>
                 </tr>
+                <!-- M-Soldat -->
                 <?php
                 $mSoldat = findSpecialPost(4);
                 foreach ($mSoldat as $mSoldatSingle) {
@@ -768,44 +794,140 @@ function ifNull($functionFull, $function)
                     <?php
                 }
                 ?>
+                <!-- Server-Verwalter -->
+                <?php
+                $sVerwalter = findSpecialPost(8);
+                foreach ($sVerwalter as $sVerwalterSingle) {
+                    ?>
+                    <tr>
+                        <td><h4>Server-Verwalter</h4></td>
+                        <td><h4> <?php echo decodeRank($sVerwalterSingle["user_rank"]); ?></h4></td>
+                        <td>
+                            <a href="<?php echo $sVerwalterSingle["url"] ?>"><?php echo $sVerwalterSingle["username"] ?></a>
+                        </td>
+                        <td> <?php echo decodePictureURL($sVerwalterSingle["user_rank"]); ?></td>
+                    </tr>
+                    <?php
+                }
+                ?>
+                <!-- Mod-Tester -->
+                <?php
+                $modtester = findSpecialPost(9);
+                foreach ($modtester as $modtesterSingle) {
+                    ?>
+                    <tr>
+                        <td><h4>Mod-Tester</h4></td>
+                        <td><h4> <?php echo decodeRank($modtesterSingle["user_rank"]); ?></h4></td>
+                        <td>
+                            <a href="<?php echo $modtesterSingle["url"] ?>"><?php echo $modtesterSingle["username"] ?></a>
+                        </td>
+                        <td> <?php echo decodePictureURL($modtesterSingle["user_rank"]); ?></td>
+                    </tr>
+                    <?php
+                }
+                ?>
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
             </table>
 
         </div>
-
+        <!-- S3 -->
+        <div class="tabelle">
+            <table style="margin-left:auto; margin-right:auto">
+                <tr>
+                    <th colspan="4" style="text-align:center"><h2>S3<i>(Einsatz und Events)</h2></i></th>
+                </tr>
+                <tr>
+                    <th><h4>Posten:</h4></th>
+                    <th><h4>Dienstgrad:&nbsp;</h4></th>
+                    <th><h3>Besetzung:</h3></th>
+                    <th><h3>Abzeichen:</h3></th>
+                </tr>
+                <!-- Leiter S3 -->
+                <tr>
+                    <td><h4>Leiter S3:</h4></td>
+                    <td><h4>
+                            <?php
+                            $keo = singleFindSpecialPost(5);
+                            if ($keo === null) {
+                                echo $rankS3;
+                            } else {
+                                echo decodeRank($keo["user_rank"]);
+                            }
+                            ?>
+                        </h4>
+                    </td>
+                    <td><a href="<?php if ($seniorDeveloper !== null) {
+                            echo $seniorDeveloper["url"];
+                        } ?>">
+                            <?php if ($keo === null) {
+                                echo $ifNoneMessage;
+                            } else {
+                                echo $keo["username"];
+                            } ?></a>
+                    </td>
+                    <td>
+                        <?php
+                        if ($keo === null) {
+                            echo '<img src="https://www.9jgkp.de/Bilder/Rang/Feldwebel.png" title="Feldwebel" alt="Feldwebel">';
+                        } else {
+                            echo decodePictureURL($keo["user_rank"]);
+                        }
+                        ?>
+                    </td>
+                </tr>
+                <!-- Missionsbauer -->
+                <?php
+                $Missionsbauer = findSpecialPost(6);
+                foreach ($Missionsbauer as $MissionsbauerSingle) {
+                    ?>
+                    <tr>
+                        <td><h4>Missionsbauer</h4></td>
+                        <td><h4> <?php echo decodeRank($MissionsbauerSingle["user_rank"]); ?></h4></td>
+                        <td>
+                            <a href="<?php echo $MissionsbauerSingle["url"] ?>"><?php echo $MissionsbauerSingle["username"] ?></a>
+                        </td>
+                        <td> <?php echo decodePictureURL($MissionsbauerSingle["user_rank"]); ?></td>
+                    </tr>
+                    <?php
+                }
+                ?>
+                <!-- Scripter -->
+                <?php
+                $scripter = findSpecialPost(8);
+                foreach ($scripter as $scripteSingle) {
+                    ?>
+                    <tr>
+                        <td><h4>Server-Verwalter</h4></td>
+                        <td><h4> <?php echo decodeRank($scripteSingle["user_rank"]); ?></h4></td>
+                        <td><a href="<?php echo $scripteSingle["url"] ?>"><?php echo $scripteSingle["username"] ?></a>
+                        </td>
+                        <td> <?php echo decodePictureURL($scripteSingle["user_rank"]); ?></td>
+                    </tr>
+                    <?php
+                }
+                ?>
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
+            </table>
+        </div>
         <div style="clear: both;"></div>
-        <div>
-            <br>
-            <br>
-            <div class="teiler"></div>
-            <br>
-            <br>
-        </div>
-        <div>
-
-            <br>
-            <br>
-            <br>
-
-        </div>
+        <?php spawnSpacer(); ?>
     </div>
-    <!-- Teiler -->
-    <div>
-        <br>
-        <br>
-        <div class="teiler"></div>
-        <br>
-        <br>
-    </div>
+
     <!-- I. ZUG -->
     <div>
         <div>
-            <!-- Überschrift I. ZUG -->
+            <!-- Zugführung -->
             <table class="center">
                 <tr>
                     <th colspan="4" style="text-align:center;"><h1>I. Zug</h1></th>
                 </tr>
-                <tr style="heigth: 20px">
-                </tr>
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
                 <tr>
                     <th><h4>Posten:</h4></th>
                     <th><h4>Dienstgrad:&nbsp;</h4></th>
@@ -825,11 +947,12 @@ function ifNull($functionFull, $function)
                             ?>
                         </h4>
                     </td>
-                    <td><a href="<?php if ($zgfhr !== null) {
+                    <td>
+                        <a href="<?php if ($zgfhr !== null) {
                             echo $zgfhr["url"];
                         } ?>">
                             <?php if ($zgfhr === null) {
-                                echo "nicht besetzt";
+                                echo $ifNoneMessage;
                             } else {
                                 echo $zgfhr["username"];
                             } ?></a>
@@ -837,7 +960,7 @@ function ifNull($functionFull, $function)
                     <td>
                         <?php
                         if ($zgfhr === null) {
-                            echo '<img src="https://www.9jgkp.de/Bilder/Rang/Feldwebel.png" title="Feldwebel" alt="Feldwebel">';
+                            echo '<img src="https://www.9jgkp.de/Bilder/Rang/Leutnant.png" title="Leutnant" alt="Leutnant">';
                         } else {
                             echo decodePictureURL($zgfhr["user_rank"]);
                         }
@@ -845,30 +968,43 @@ function ifNull($functionFull, $function)
                     </td>
                 </tr>
                 <tr>
-                    <?php
-                    $stlvZgfhr = findPost(5);
-                    foreach ($stlvZgfhr
-
-                    as $stlvZgfhrSingle) {
-                    ?>
-                <tr>
-                    <td><h4>Stlv. Zugführung:</h4></td>
-                    <td><h4> <?php
-                            if ($stlvZgfhrSingle === null) {
-                                echo $rankStelvZgfh;
+                    <td><h4>Stv. Zugführung:</h4></td>
+					<td>
+						<h4>
+                            <?php
+                            $stlvZgfhr = singlefindPost(5);
+                            if ($stlvZgfhr === null) {
+                                echo $rankstvZgFhr;
                             } else {
-                                echo decodeRank($stlvZgfhrSingle["user_rank"]);
+                                echo decodeRank($stlvZgfhr["user_rank"]);
                             }
-                            ?></h4></td>
-                    <td><a href="<?php echo $stlvZgfhrSingle["url"] ?>"><?php echo $stlvZgfhrSingle["username"] ?></a>
+                            ?>
+						</h4>
                     </td>
-                    <td> <?php echo decodePictureURL($stlvZgfhrSingle["user_rank"]); ?></td>
+                    <td><a href="<?php if ($stlvZgfhr !== null) {
+                            echo $stlvZgfhr["url"];
+                        } ?>">
+                            <?php if ($stlvZgfhr === null) {
+                                echo $ifNoneMessage;
+                            } else {
+                                echo $stlvZgfhr["username"];
+                            } ?></a>
+                    </td>
+                    <td>
+                        <?php
+                        if ($stlvZgfhr === null) {
+                            echo '<img src="https://www.9jgkp.de/Bilder/Rang/Faehnrich.png" title="Fähnrich" alt="Fähnrich">';
+                        } else {
+                            echo decodePictureURL($stlvZgfhr["user_rank"]);
+                        }
+                        ?>
+                    </td>
                 </tr>
-                <?php
-                }
-                ?>
             </table>
         </div>
+		
+		<div style="clear: both;"></div>
+		
         <div>
             <br>
             <br>
@@ -886,9 +1022,11 @@ function ifNull($functionFull, $function)
                     <th><h3>Besetzung:</h3></th>
                     <th><h3>Abzeichen:</h3></th>
                 </tr>
+                <!-- GrpFhr -->
                 <tr>
                     <td><h4>Gruppenführer:</h4></td>
-                    <td><h4>
+                    <td>
+                        <h4>
                             <?php
                             $grpFhr = singleFindPostionPost(0, 1);
                             if ($grpFhr === null) {
@@ -903,7 +1041,7 @@ function ifNull($functionFull, $function)
                             echo $grpFhr["url"];
                         } ?>">
                             <?php if ($grpFhr === null) {
-                                echo "nicht besetzt";
+                                echo $ifNoneMessage;
                             } else {
                                 echo $grpFhr["username"];
                             } ?></a>
@@ -918,94 +1056,54 @@ function ifNull($functionFull, $function)
                         ?>
                     </td>
                 </tr>
+                <!-- Stv. GrpFhr -->
                 <tr>
                     <?php
-                    $stlvGrpFhr = singleFindPost(2);
-                    $stlvGrpFhrPosition = singleFindPostion(0);
-                    if ($stlvGrpFhrPosition !== null) {
-                        ?>
-                        <td><h4>Stelv. Gruppenführer:</h4></td>
-                        <td><h4>
-                                <?php
-                                $stlvGrpFhr = singleFindPost(2);
-                                if ($stlvGrpFhr === null) {
-                                    echo $rankStlvGrpFhr;
-                                } else {
-                                    echo decodeRank($stlvGrpFhr["user_rank"]);
-                                }
-                                ?>
-                            </h4>
-                        </td>
-                        <td><a href="<?php if ($stlvGrpFhr !== null) {
-                                echo $stlvGrpFhr["url"];
-                            } ?>">
-                                <?php if ($stlvGrpFhr === null) {
-                                    echo "nicht besetzt";
-                                } else {
-                                    echo $stlvGrpFhr["username"];
-                                } ?></a>
-                        </td>
+                    $stlvGrpFhr = singleFindPostionPost(0, 2);
 
-
-                        <td>
-                            <?php
-                            if ($stlvGrpFhr === null) {
-                                echo '<img src="https://www.9jgkp.de/Bilder/Rang/Gefreiter.png" title="Gefreiter" alt="Gefreiter">';
-                            } else {
-                                echo decodePictureURL($stlvGrpFhr["user_rank"]);
-                            }
-                            ?>
-                        </td>
-                        <?php
-                    }
                     ?>
-                </tr>
-
-                <tr>
-                    <?php
-                    $stlvGrpFhr = singleFindPostionPost(0,2);
-
-                        ?>
-                        <td><h4>Stelv. Gruppenführer:</h4></td>
-                        <td><h4>
-                                <?php
-                                $stlvGrpFhr = singleFindPost(2);
-                                if ($stlvGrpFhr === null) {
-                                    echo $rankStlvGrpFhr;
-                                } else {
-                                    echo decodeRank($stlvGrpFhr["user_rank"]);
-                                }
-                                ?>
-                            </h4>
-                        </td>
-                        <td><a href="<?php if ($stlvGrpFhr !== null) {
-                                echo $stlvGrpFhr["url"];
-                            } ?>">
-                                <?php if ($stlvGrpFhr === null) {
-                                    echo "nicht besetzt";
-                                } else {
-                                    echo $stlvGrpFhr["username"];
-                                } ?></a>
-                        </td>
-
-
-                        <td>
+                    <td><h4>Stv. Gruppenführer:</h4></td>
+                    <td><h4>
                             <?php
+                            $stlvGrpFhr = singleFindPost(2);
                             if ($stlvGrpFhr === null) {
-                                echo '<img src="https://www.9jgkp.de/Bilder/Rang/Gefreiter.png" title="Gefreiter" alt="Gefreiter">';
+                                echo $rankStlvGrpFhr;
                             } else {
-                                echo decodePictureURL($stlvGrpFhr["user_rank"]);
+                                echo decodeRank($stlvGrpFhr["user_rank"]);
                             }
                             ?>
-                        </td>
+                        </h4>
+                    </td>
+                    <td><a href="<?php if ($stlvGrpFhr !== null) {
+                            echo $stlvGrpFhr["url"];
+                        } ?>">
+                            <?php if ($stlvGrpFhr === null) {
+                                echo $ifNoneMessage;
+                            } else {
+                                echo $stlvGrpFhr["username"];
+                            } ?></a>
+                    </td>
+
+                    <td>
+                        <?php
+                        if ($stlvGrpFhr === null) {
+                            echo '<img src="https://www.9jgkp.de/Bilder/Rang/Unteroffizier.png" title="Unteroffizier" alt="Unteroffizier">';
+                        } else {
+                            echo decodePictureURL($stlvGrpFhr["user_rank"]);
+                        }
+                        ?>
+                    </td>
                 </tr>
 
+                <!-- Soldaten -->
                 <?php
-                $Soldat = findPostionPost(0,0);
+                $num = 0;
+                $Soldat = findPostionPost(0, 0);
                 foreach ($Soldat as $SoldatSingle) {
+                    $num++;
                     ?>
                     <tr>
-                        <td><h4>V-Soldat</h4></td>
+                        <td><h4>Soldat</h4></td>
                         <td><h4> <?php echo decodeRank($SoldatSingle["user_rank"]); ?></h4></td>
                         <td><a href="<?php echo $SoldatSingle["url"] ?>"><?php echo $SoldatSingle["username"] ?></a>
                         </td>
@@ -1013,34 +1111,49 @@ function ifNull($functionFull, $function)
                     </tr>
                     <?php
                 }
+                $notFilledSoldiers = 9 - $num;
+                if ($notFilledSoldiers < 0) {
+                    echo "lol";
+                } else {
+                    $num = 0;
+                    while ($num < $notFilledSoldiers) {
+                        $num++;
+                        ?>
+                        <tr>
+                            <td><h4>Soldat</h4></td>
+                            <td><h4><?php echo $rankSoldat ?><h/4></td>
+                            <td><?php echo '<a href="">' . $ifNoneMessage . '</a>' ?></td>
+                            <td><img src="https://www.9jgkp.de/Bilder/Rang/Jaeger.png" title="Jaeger" alt="Jaeger"></td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                    <?php
+                }
                 ?>
-
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
             </table>
-
         </div>
+
         <!-- II. Gruppe -->
         <div class="tabelle">
-
             <table style="margin-left:auto; margin-right:auto">
-
                 <tr>
-
-                    <th colspan="4" style="text-align:center"><h2>2. Gruppe <i>(Bravo)</h2></i></th>
-
+                    <th colspan="4"><h2>2. Gruppe <i>(Bravo)</i></h2></th>
                 </tr>
-
                 <tr>
-
                     <th><h4>Posten:</h4></th>
                     <th><h4>Dienstgrad:&nbsp;</h4></th>
                     <th><h3>Besetzung:</h3></th>
                     <th><h3>Abzeichen:</h3></th>
-
                 </tr>
-
+                <!-- GrpFhr -->
                 <tr>
                     <td><h4>Gruppenführer:</h4></td>
-                    <td><h4>
+                    <td>
+                        <h4>
                             <?php
                             $grpFhr = singleFindPostionPost(1, 1);
                             if ($grpFhr === null) {
@@ -1055,7 +1168,7 @@ function ifNull($functionFull, $function)
                             echo $grpFhr["url"];
                         } ?>">
                             <?php if ($grpFhr === null) {
-                                echo "nicht besetzt";
+                                echo $ifNoneMessage;
                             } else {
                                 echo $grpFhr["username"];
                             } ?></a>
@@ -1070,13 +1183,13 @@ function ifNull($functionFull, $function)
                         ?>
                     </td>
                 </tr>
-
+                <!-- Stv. GrpFhr -->
                 <tr>
                     <?php
-                    $stlvGrpFhr = singleFindPostionPost(1,2);
+                    $stlvGrpFhr = singleFindPostionPost(1, 2);
 
                     ?>
-                    <td><h4>Stelv. Gruppenführer:</h4></td>
+                    <td><h4>Stv. Gruppenführer:</h4></td>
                     <td><h4>
                             <?php
                             $stlvGrpFhr = singleFindPost(2);
@@ -1092,7 +1205,7 @@ function ifNull($functionFull, $function)
                             echo $stlvGrpFhr["url"];
                         } ?>">
                             <?php if ($stlvGrpFhr === null) {
-                                echo "nicht besetzt";
+                                echo $ifNoneMessage;
                             } else {
                                 echo $stlvGrpFhr["username"];
                             } ?></a>
@@ -1101,7 +1214,7 @@ function ifNull($functionFull, $function)
                     <td>
                         <?php
                         if ($stlvGrpFhr === null) {
-                            echo '<img src="https://www.9jgkp.de/Bilder/Rang/Gefreiter.png" title="Gefreiter" alt="Gefreiter">';
+                            echo '<img src="https://www.9jgkp.de/Bilder/Rang/Unteroffizier.png" title="Unteroffizier" alt="Unteroffizier">';
                         } else {
                             echo decodePictureURL($stlvGrpFhr["user_rank"]);
                         }
@@ -1109,9 +1222,12 @@ function ifNull($functionFull, $function)
                     </td>
                 </tr>
 
+                <!-- Soldaten -->
                 <?php
-                $Soldat = findPostionPost(1,0);
+                $num = 0;
+                $Soldat = findPostionPost(1, 0);
                 foreach ($Soldat as $SoldatSingle) {
+                    $num++;
                     ?>
                     <tr>
                         <td><h4>Soldat</h4></td>
@@ -1122,361 +1238,334 @@ function ifNull($functionFull, $function)
                     </tr>
                     <?php
                 }
-                ?>
-
-            </table>
-
-        </div>
-        <!-- III. Gruppe -->
-        <div class="tabelle">
-
-            <table style="margin-left:auto; margin-right:auto">
-
-                <tr>
-
-                    <th colspan="4" style="text-align:center"><h2>3. Gruppe <i>(Charlie)</h2></i></th>
-
-                </tr>
-
-                <tr>
-
-                    <th><h4>Posten:</h4></th>
-                    <th><h4>Dienstgrad:&nbsp;</h4></th>
-                    <th><h3>Besetzung:</h3></th>
-                    <th><h3>Abzeichen:</h3></th>
-
-                </tr>
-
-                <tr>
-                    <td><h4>Gruppenführer:</h4></td>
-                    <td><h4>
-                            <?php
-                            $grpFhr = singleFindPostionPost(2, 1);
-                            if ($grpFhr === null) {
-                                echo $rankGrpFhr;
-                            } else {
-                                echo decodeRank($grpFhr["user_rank"]);
-                            }
-                            ?>
-                        </h4>
-                    </td>
-                    <td><a href="<?php if ($grpFhr !== null) {
-                            echo $grpFhr["url"];
-                        } ?>">
-                            <?php if ($grpFhr === null) {
-                                echo "nicht besetzt";
-                            } else {
-                                echo $grpFhr["username"];
-                            } ?></a>
-                    </td>
-                    <td>
-                        <?php
-                        if ($grpFhr === null) {
-                            echo '<img src="https://www.9jgkp.de/Bilder/Rang/Feldwebel.png" title="Feldwebel" alt="Feldwebel">';
-                        } else {
-                            echo decodePictureURL($grpFhr["user_rank"]);
-                        }
+                $notFilledSoldiers = 9 - $num;
+                if ($notFilledSoldiers < 0) {
+                    echo "lol";
+                } else {
+                    $num = 0;
+                    while ($num < $notFilledSoldiers) {
+                        $num++;
                         ?>
-                    </td>
-                </tr>
-                <tr>
-                    <?php
-                    $stlvGrpFhr = singleFindPost(2);
-                    $stlvGrpFhrPosition = singleFindPostion(0);
-                    if ($stlvGrpFhrPosition !== null) {
-                        ?>
-                        <td><h4>Stelv. Gruppenführer:</h4></td>
-                        <td><h4>
-                                <?php
-                                $stlvGrpFhr = singleFindPost(2);
-                                if ($stlvGrpFhr === null) {
-                                    echo $rankStlvGrpFhr;
-                                } else {
-                                    echo decodeRank($stlvGrpFhr["user_rank"]);
-                                }
-                                ?>
-                            </h4>
-                        </td>
-                        <td><a href="<?php if ($stlvGrpFhr !== null) {
-                                echo $stlvGrpFhr["url"];
-                            } ?>">
-                                <?php if ($stlvGrpFhr === null) {
-                                    echo "nicht besetzt";
-                                } else {
-                                    echo $stlvGrpFhr["username"];
-                                } ?></a>
-                        </td>
-
-
-                        <td>
-                            <?php
-                            if ($stlvGrpFhr === null) {
-                                echo '<img src="https://www.9jgkp.de/Bilder/Rang/Gefreiter.png" title="Gefreiter" alt="Gefreiter">';
-                            } else {
-                                echo decodePictureURL($stlvGrpFhr["user_rank"]);
-                            }
-                            ?>
-                        </td>
+                        <tr>
+                            <td><h4>Soldat</h4></td>
+                            <td><h4><?php echo $rankSoldat ?><h/4></td>
+                            <td><?php echo '<a href="">' . $ifNoneMessage . '</a>' ?></td>
+                            <td><img src="https://www.9jgkp.de/Bilder/Rang/Jaeger.png" title="Jaeger" alt="Jaeger"></td>
+                        </tr>
                         <?php
                     }
                     ?>
-                </tr>
-
-                <tr>
-                    <?php
-                    $stlvGrpFhr = singleFindPostionPost(2,2);
-
-                    ?>
-                    <td><h4>Stelv. Gruppenführer:</h4></td>
-                    <td><h4>
-                            <?php
-                            $stlvGrpFhr = singleFindPost(2);
-                            if ($stlvGrpFhr === null) {
-                                echo $rankStlvGrpFhr;
-                            } else {
-                                echo decodeRank($stlvGrpFhr["user_rank"]);
-                            }
-                            ?>
-                        </h4>
-                    </td>
-                    <td><a href="<?php if ($stlvGrpFhr !== null) {
-                            echo $stlvGrpFhr["url"];
-                        } ?>">
-                            <?php if ($stlvGrpFhr === null) {
-                                echo "nicht besetzt";
-                            } else {
-                                echo $stlvGrpFhr["username"];
-                            } ?></a>
-                    </td>
-
-
-                    <td>
-                        <?php
-                        if ($stlvGrpFhr === null) {
-                            echo '<img src="https://www.9jgkp.de/Bilder/Rang/Gefreiter.png" title="Gefreiter" alt="Gefreiter">';
-                        } else {
-                            echo decodePictureURL($stlvGrpFhr["user_rank"]);
-                        }
-                        ?>
-                    </td>
-                </tr>
-
-                <?php
-                $Soldat = findPostionPost(2,0);
-                foreach ($Soldat as $SoldatSingle) {
-                    ?>
-                    <tr>
-                        <td><h4>V-Soldat</h4></td>
-                        <td><h4> <?php echo decodeRank($SoldatSingle["user_rank"]); ?></h4></td>
-                        <td><a href="<?php echo $SoldatSingle["url"] ?>"><?php echo $SoldatSingle["username"] ?></a>
-                        </td>
-                        <td> <?php echo decodePictureURL($SoldatSingle["user_rank"]); ?></td>
-                    </tr>
                     <?php
                 }
                 ?>
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
             </table>
-
-        </div>
-        <div style="clear: both;"></div>
-        <div>
-
-            <br>
-            <br>
-            <br>
-
-        </div>
-        <!-- IV. Gruppe -->
-        <div class="center">
-            <table style="margin-left:auto; margin-right:auto">
-                <tr>
-                    <th colspan="4"><h2>4. Gruppe <i>(Sierra)</i></h2></th>
-                </tr>
-                <tr>
-                    <th><h4>Posten:</h4></th>
-                    <th><h4>Dienstgrad:&nbsp;</h4></th>
-                    <th><h3>Besetzung:</h3></th>
-                    <th><h3>Abzeichen:</h3></th>
-                </tr>
-                <tr>
-                    <?php
-                    $GrpFhr = singleFindPostionPost(3,1);
-
-                    ?>
-                    <td><h4>Gruppenführer:</h4></td>
-                    <td><h4>
-                            <?php
-                            $GrpFhr = singleFindPost(2);
-                            if ($GrpFhr === null) {
-                                echo $rankGrpFhr;
-                            } else {
-                                echo decodeRank($GrpFhr["user_rank"]);
-                            }
-                            ?>
-                        </h4>
-                    </td>
-                    <td><a href="<?php if ($GrpFhr !== null) {
-                            echo $GrpFhr["url"];
-                        } ?>">
-                            <?php if ($GrpFhr === null) {
-                                echo "nicht besetzt";
-                            } else {
-                                echo $GrpFhr["username"];
-                            } ?></a>
-                    </td>
-
-                    <td>
-                        <?php
-                        if ($GrpFhr === null) {
-                            echo '<img src="https://www.9jgkp.de/Bilder/Rang/Gefreiter.png" title="Gefreiter" alt="Gefreiter">';
-                        } else {
-                            echo decodePictureURL($GrpFhr["user_rank"]);
-                        }
-                        ?>
-                    </td>
-                </tr>
-
-                <?php
-                $Soldat = findPostionPost(3,0);
-                foreach ($Soldat as $SoldatSingle) {
-                    ?>
-                    <tr>
-                        <td><h4>Soldat</h4></td>
-                        <td><h4> <?php echo decodeRank($SoldatSingle["user_rank"]); ?></h4></td>
-                        <td><a href="<?php echo $SoldatSingle["url"] ?>"><?php echo $SoldatSingle["username"] ?></a>
-                        </td>
-                        <td> <?php echo decodePictureURL($SoldatSingle["user_rank"]); ?></td>
-                    </tr>
-                    <?php
-                }
-                ?>
-                <!--
-                                    <tr>
-
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-
-                                    </tr>
-
-                                    <tr>
-
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-
-                                    </tr>
-
-                                    <tr>
-
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-
-                                    </tr>
-
-                                    <tr>
-
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-
-                                    </tr>
-
-                                    <tr>
-
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-
-
-                                    </tr>
-
-                                    <tr>
-
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-
-                                    </tr>
-
-                                    <tr>
-
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-
-                                    </tr>
-
-                                    <tr>
-
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-
-                                    </tr>
-                -->
-            </table>
-
         </div>
 
-    </div>
+		<!-- III. Gruppe -->
+		<div class="tabelle">
+			<table style="margin-left:auto; margin-right:auto">
+				<tr>
+					<th colspan="4"><h2>3. Gruppe <i>(Charlie)</i></h2></th>
+				</tr>
+				<tr>
+					<th><h4>Posten:</h4></th>
+					<th><h4>Dienstgrad:&nbsp;</h4></th>
+					<th><h3>Besetzung:</h3></th>
+					<th><h3>Abzeichen:</h3></th>
+				</tr>
+				<!-- GrpFhr -->
+				<tr>
+					<td><h4>Gruppenführer:</h4></td>
+					<td>
+						<h4>
+							<?php
+							$grpFhr = singleFindPostionPost(2, 1);
+							if ($grpFhr === null) {
+								echo $rankGrpFhr;
+							} else {
+								echo decodeRank($grpFhr["user_rank"]);
+							}
+							?>
+						</h4>
+					</td>
+					<td><a href="<?php if ($grpFhr !== null) {
+							echo $grpFhr["url"];
+						} ?>">
+							<?php if ($grpFhr === null) {
+								echo $ifNoneMessage;
+							} else {
+								echo $grpFhr["username"];
+							} ?></a>
+					</td>
+					<td>
+						<?php
+						if ($grpFhr === null) {
+							echo '<img src="https://www.9jgkp.de/Bilder/Rang/Feldwebel.png" title="Feldwebel" alt="Feldwebel">';
+						} else {
+							echo decodePictureURL($grpFhr["user_rank"]);
+						}
+						?>
+					</td>
+				</tr>
+				<!-- Stv. GrpFhr -->
+				<tr>
+					<?php
+					$stlvGrpFhr = singleFindPostionPost(2, 2);
 
-    <div style="clear: both;"></div>
+					?>
+					<td><h4>Stv. Gruppenführer:</h4></td>
+					<td><h4>
+							<?php
+							$stlvGrpFhr = singleFindPost(2);
+							if ($stlvGrpFhr === null) {
+								echo $rankStlvGrpFhr;
+							} else {
+								echo decodeRank($stlvGrpFhr["user_rank"]);
+							}
+							?>
+						</h4>
+					</td>
+					<td><a href="<?php if ($stlvGrpFhr !== null) {
+							echo $stlvGrpFhr["url"];
+						} ?>">
+							<?php if ($stlvGrpFhr === null) {
+								echo $ifNoneMessage;
+							} else {
+								echo $stlvGrpFhr["username"];
+							} ?></a>
+					</td>
+
+					<td>
+						<?php
+						if ($stlvGrpFhr === null) {
+							echo '<img src="https://www.9jgkp.de/Bilder/Rang/Unteroffizier.png" title="Unteroffizier" alt="Unteroffizier">';
+						} else {
+							echo decodePictureURL($stlvGrpFhr["user_rank"]);
+						}
+						?>
+					</td>
+				</tr>
+
+				<!-- Soldaten -->
+				<?php
+				$num = 0;
+				$Soldat = findPostionPost(2, 0);
+				foreach ($Soldat as $SoldatSingle) {
+					$num++;
+					?>
+					<tr>
+						<td><h4>Soldat</h4></td>
+						<td><h4> <?php echo decodeRank($SoldatSingle["user_rank"]); ?></h4></td>
+						<td><a href="<?php echo $SoldatSingle["url"] ?>"><?php echo $SoldatSingle["username"] ?></a>
+						</td>
+						<td> <?php echo decodePictureURL($SoldatSingle["user_rank"]); ?></td>
+					</tr>
+					<?php
+				}
+				$notFilledSoldiers = 9 - $num;
+				if ($notFilledSoldiers < 0) {
+					echo "lol";
+				} else {
+					$num = 0;
+					while ($num < $notFilledSoldiers) {
+						$num++;
+						?>
+						<tr>
+							<td><h4>Soldat:</h4></td>
+							<td><h4><?php echo $rankSoldat ?></h4></td>
+							<td><?php echo '<a href="">' . $ifNoneMessage . '</a>' ?></td>
+							<td><img src="https://www.9jgkp.de/Bilder/Rang/Jaeger.png" title="Jaeger" alt="Jaeger"></td>
+						</tr>
+						<?php
+					}
+					?>
+					<?php
+				}
+				?>
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
+			</table>
+		</div>
+		<div style="clear: both;"></div>
+		<div>
+
+			<br>
+			<br>
+			<br>
+
+		</div>
+		<!-- IV. Gruppe -1-->
+		<div class="tabelle">
+			<table style="margin-left:auto; margin-right:auto">
+				<tr>
+					<th colspan="4"><h2>&nbsp;</h2></th>
+				</tr>
+			</table>		
+		</div>
+		<!-- IV. Gruppe -->
+		<div class="tabelle">
+			<table style="margin-left:auto; margin-right:auto">
+				<tr>
+					<th colspan="4"><h2>4. Gruppe <i>(Sierra)</i></h2></th>
+				</tr>
+				<tr>
+					<th><h4>Posten:</h4></th>
+					<th><h4>Dienstgrad:&nbsp;</h4></th>
+					<th><h3>Besetzung:</h3></th>
+					<th><h3>Abzeichen:</h3></th>
+				</tr>
+				<!-- Scharfschütze -->
+				<tr>
+					<?php
+					$GrpFhr = singleFindPostionPost(8, 3);
+					?>
+					<td><h4>Scharfschütze:</h4></td>
+					<td><h4>
+							<?php
+							$GrpFhr = singleFindPost(2);
+							if ($GrpFhr === null) {
+								echo $rankSoldat;
+							} else {
+								echo decodeRank($GrpFhr["user_rank"]);
+							}
+							?>
+						</h4>
+					</td>
+					<td><a href="<?php if ($GrpFhr !== null) {
+							echo $GrpFhr["url"];
+						} ?>">
+							<?php if ($GrpFhr === null) {
+								echo $ifNoneMessage;
+							} else {
+								echo $GrpFhr["username"];
+							} ?></a>
+					</td>
+
+					<td>
+						<?php
+						if ($GrpFhr === null) {
+							echo '<img src="https://www.9jgkp.de/Bilder/Rang/Gefreiter.png" title="Gefreiter" alt="Gefreiter">';
+						} else {
+							echo decodePictureURL($GrpFhr["user_rank"]);
+						}
+						?>
+					</td>
+				</tr>
+				<tr>
+					<?php
+					$GrpFhr = singleFindPostionPost(7, 3);
+					?>
+					<td><h4>Beobachter:</h4></td>
+					<td><h4>
+							<?php
+							$GrpFhr = singleFindPost(2);
+							if ($GrpFhr === null) {
+								echo $rankSoldat;
+							} else {
+								echo decodeRank($GrpFhr["user_rank"]);
+							}
+							?>
+						</h4>
+					</td>
+					<td><a href="<?php if ($GrpFhr !== null) {
+							echo $GrpFhr["url"];
+						} ?>">
+							<?php if ($GrpFhr === null) {
+								echo $ifNoneMessage;
+							} else {
+								echo $GrpFhr["username"];
+							} ?></a>
+					</td>
+
+					<td>
+						<?php
+						if ($GrpFhr === null) {
+							echo '<img src="https://www.9jgkp.de/Bilder/Rang/Gefreiter.png" title="Gefreiter" alt="Gefreiter">';
+						} else {
+							echo decodePictureURL($GrpFhr["user_rank"]);
+						}
+						?>
+					</td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+				</tr>
+
+			</table>
+
+		</div>
+		<!-- IV. Gruppe +1-->
+		<div class="tabelle">
+			<table style="margin-left:auto; margin-right:auto">
+				<tr>
+					<th colspan="4"><h2>&nbsp;</h2></th>
+				</tr>
+			</table>		
+		</div>
+	</div>
+	
+	<div style="clear: both;"></div>
+	<?php spawnSpacer() ?>
+
+
+	<!-- Reserve und Rekruten -->
+	<div>
+
+		<!-- Reserve und Rekruten -->
+		<div style="text-align:center;">
+			<!-- Überschrift -->
+			<h1>Reservisten<h1>
+			<br>
+		</div>
+
+		<div>
+			<?php
+			$x = 1;
+			if ($x === 1) {
+				?>
+				<table class="tabelle-res">
+
+					<tr>
+						
+						<th><h4>Dienstgrad:&nbsp;</h4></th>
+						<th><h3>Besetzung:</h3></th>
+						<th><h3>Abzeichen:</h3></th>
+
+					</tr>
+
+					<?php
+					$Soldat = findPosition(5);
+					foreach ($Soldat as $SoldatSingle) {
+						?>
+						<tr>
+							<td><h4> <?php echo decodeRank($SoldatSingle["user_rank"]); ?></h4></td>
+							<td><h3><a href="<?php echo $SoldatSingle["url"] ?>"><?php echo $SoldatSingle["username"] ?></a></h3></td>
+							<td><h3><?php echo decodePictureURL($SoldatSingle["user_rank"]); ?></h3></td>
+							
+						</tr>
+						<?php
+					}
+					?>
+
+				</table>
+				<?php
+			}
+
+			?>
+
+		</div>
+
+	</div>
+	
+	<?php spawnSpacer() ?>
+
 </div>
-<!-- Reserve und Rekruten -->
-<div>
 
-    <!-- Reserve und Rekruten -->
-    <div style="text-align:center;">
-        <!-- Überschrift -->
-        <h1>Reservisten<h1>
-    </div>
-
-    <div>
-        <?php
-        $x = 1;
-        if($x===1){
-            ?>
-            <table class="tabelle-res">
-
-                <tr>
-
-                    <th><h4>&nbsp;Besetzung:</h4></th>
-                    <th style="text-align:center;"><h3>Abzeichen:</h3></th>
-
-                </tr>
-
-                <?php
-                $Soldat = findPosition(5);
-                foreach ($Soldat as $SoldatSingle) {
-                    ?>
-                    <tr>
-                        <td><a href="<?php echo $SoldatSingle["url"] ?>"><?php echo $SoldatSingle["username"] ?></a></td>
-                        <td> <?php echo decodePictureURL($SoldatSingle["user_rank"]); ?></td>
-                    </tr>
-                    <?php
-                }
-                ?>
-
-            </table>
-            <?php
-        }
-
-        ?>
-
-    </div>
-
-</div>
-
+<div style="clear: both;"></div>
 </body>
 
 </html>
