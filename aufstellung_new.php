@@ -277,7 +277,7 @@ function decodePost($number): string
             $output = "Gruppenführer";
             break;
         case 2:
-            $output = "Stlv. Gruppenführer";
+            $output = "Stv. Gruppenführer";
             break;
         case 3:
             $output = "Kompaniechef";
@@ -286,7 +286,7 @@ function decodePost($number): string
             $output = "Kompanieführer";
             break;
         case 5:
-            $output = "Stellvertretender Zugführer";
+            $output = "Stv. Zugführer";
             break;
         case 6:
             $output = "Zugführer";
@@ -332,7 +332,7 @@ function decodeSpecialPosts($number): string
     $output = "Sonderposten sind irrelevant->ignorieren, nein Spaß(Error Code: 1)";
     switch ($number) {
         case 0:
-            $output = "kein Sonderposten";
+            $output = "Kein Sonderposten";
             break;
         case 1:
             $output = "Kompaniefeldwebel";
@@ -549,7 +549,6 @@ function ifNull($functionFull, $function)
     <title>Aufstellung - 9Jgkp</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bearbeitet am xx.xx.xxxx ist egal weil datenbank bitch | Version 69 -->
 </head>
 
 <body oncontextmenu="return false">
