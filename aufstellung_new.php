@@ -338,7 +338,7 @@ function decodeSpecialPosts($number): string
             $output = "Kompaniefeldwebel";
             break;
         case 2:
-            $output = "Verwaltungs Soldat";
+            $output = "Verwaltungs Soldat I";
             break;
         case 3:
             $output = "Leiter S2";
@@ -347,10 +347,19 @@ function decodeSpecialPosts($number): string
             $output = "Medien Soldat";
             break;
         case 5:
-            $output = "Leiter S3";
+            $output = "Leiter S3 KEO";
             break;
         case 6:
-            $output = "S3 Sklave";
+            $output = "Missionsbauer";
+            break;
+        case 7:
+            $output = "Scripter";
+            break;
+        case 8:
+            $output = "Server Verwalter";
+            break;
+        case 9:
+            $output = "Mod-Tester";
             break;
     }
     return $output;
